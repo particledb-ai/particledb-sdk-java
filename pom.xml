@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ai.particledb</groupId>
+    <artifactId>particledb-java-sdk</artifactId>
+    <version>1.1.2</version>
+    <packaging>jar</packaging>
+
+    <name>ParticleDB Java SDK</name>
+    <description>
+        High-level Java SDK for ParticleDB. Idiomatic API over PDB-wire and
+        gRPC transports — SQL, KV, Vector, RAG, and AI operations from a
+        single fluent client. For drop-in JDBC use see ai.particledb:particledb-jdbc.
+        Requires Java 11 or later; no JVM flags are needed on any JDK.
+    </description>
+    <url>https://particledb.ai/sdks/java/</url>
+
+    <inceptionYear>2026</inceptionYear>
+    <organization>
+        <name>Orkes, Inc.</name>
+        <url>https://particledb.ai</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit/</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>particledb</id>
+            <name>ParticleDB Engineering</name>
+            <email>eng@particledb.ai</email>
+            <organization>Orkes, Inc.</organization>
+            <organizationUrl>https://particledb.ai</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/particledb-ai/particledb-sdk-java</url>
+        <connection>scm:git:https://github.com/particledb-ai/particledb-sdk-java.git</connection>
+        <developerConnection>scm:git:git@github.com:particledb-ai/particledb-sdk-java.git</developerConnection>
+    </scm>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/particledb-ai/particledb-sdk-java/issues</url>
+    </issueManagement>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.release>11</maven.compiler.release>
+        <gpg.keyname>3736269DB424C52A</gpg.keyname>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <grpc.version>1.85.1</grpc.version>
+        <protobuf.version>4.36.2</protobuf.version>
+        <protoc.version>4.36.2</protoc.version>
+        <javax.annotation.version>1.3.2</javax.annotation.version>
+        <arrow.version>15.0.2</arrow.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>2.22.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.1.139.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Default transport: the ParticleDB native-wire JDBC driver
+             (org.particledb.Driver, jdbc:particledb://host:7173/db), from
+             https://github.com/particledb-ai/particledb-jdbc. -->
+        <dependency>
+            <groupId>ai.particledb</groupId>
+            <artifactId>particledb-jdbc</artifactId>
+            <!-- Every SDK call is routed through this driver. -->
+            <version>1.0.11</version>
+        </dependency>
+
+        <!-- Legacy PostgreSQL wire: OPTIONAL. Only used when the caller
+             explicitly selects Config.Protocol.POSTGRES or passes a
+             jdbc:postgresql: URL; ParticleDB raises a clear error if it is
+             absent. Not pulled in transitively. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.14</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- gRPC dependencies -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>${grpc.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Protobuf runtime -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Required for @Generated annotation used by gRPC stubs (Java 9+) -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+            <version>${javax.annotation.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Apache Arrow Java: OPTIONAL, never transitive. Nothing in this SDK
+             needs it: the driver decodes results with its own pure-Java
+             reader. It is only used when the application selects
+             resultDecoder=arrow (and then adds Arrow itself; on JDK 16+ also
+             add-opens java.base/java.nio=ALL-UNNAMED). Mirrors the
+             particledb-jdbc module. -->
+        <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-vector</artifactId>
+            <version>${arrow.version}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-memory-netty</artifactId>
+            <version>${arrow.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- Include proto files so downstream consumers can re-generate stubs -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.1</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+
+            <!-- Protobuf / gRPC code generation -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <!-- No JVM flags: the SDK must run on a plain JVM. -->
+            </plugin>
+
+            <!-- Source jar for Maven Central -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Javadoc jar for Maven Central -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <docfilessubdirs>true</docfilessubdirs>
+                    <failOnError>true</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            Activate with:  mvn -P release deploy
+            Requires:
+              - ~/.m2/settings.xml has a <server id="central"> with
+                Sonatype Central Portal user-token credentials.
+              - GPG key available to maven-gpg-plugin.
+        -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.4</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>${gpg.keyname}</keyname>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.11.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                            <waitUntil>validated</waitUntil>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
