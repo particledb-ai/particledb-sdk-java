@@ -2,7 +2,9 @@
 
 A small Java API for queries, transactions, key-value operations and streamed results. Uses the native JDBC driver by default. Requires Java 11 or later. No JVM flags are needed on any JDK; see [No JVM flags](#no-jvm-flags).
 
-This checkout is the `1.1.2` release and depends on JDBC `1.0.11`. Both are on Maven Central. Servers 1.1.19-rc.15 or later listen on port 7173.
+This checkout is the `1.1.3` release and depends on JDBC `1.0.12`. Servers 1.1.19-rc.15 or later listen on port 7173.
+
+1.1.3 changes only the driver it depends on. With JDBC 1.0.12 a call against a server that stopped answering logs a WARNING after 60 seconds without a response (`slowCallWarnMillis`), and a cancelled or timed-out call ends within the cancellation grace period even when the server never answers.
 
 ## Install
 
@@ -10,7 +12,7 @@ This checkout is the `1.1.2` release and depends on JDBC `1.0.11`. Both are on M
 <dependency>
   <groupId>ai.particledb</groupId>
   <artifactId>particledb-java-sdk</artifactId>
-  <version>1.1.2</version>
+  <version>1.1.3</version>
 </dependency>
 ```
 

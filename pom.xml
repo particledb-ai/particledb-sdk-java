@@ -6,7 +6,7 @@
 
     <groupId>ai.particledb</groupId>
     <artifactId>particledb-java-sdk</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
     <packaging>jar</packaging>
 
     <name>ParticleDB Java SDK</name>
@@ -91,7 +91,7 @@
             <groupId>ai.particledb</groupId>
             <artifactId>particledb-jdbc</artifactId>
             <!-- Every SDK call is routed through this driver. -->
-            <version>1.0.11</version>
+            <version>1.0.12</version>
         </dependency>
 
         <!-- Legacy PostgreSQL wire: OPTIONAL. Only used when the caller

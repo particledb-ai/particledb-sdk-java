@@ -11,10 +11,18 @@ class PipelineReadinessTest {
         assumeTrue(port != null, "PDB_NATIVE_PORT required");
         try (ParticleDB db = new ParticleDB(Config.builder().host("127.0.0.1").port(Integer.parseInt(port)).build())) {
             String name = "java_pipeline_" + ProcessHandle.current().pid();
-            db.rag().createPipeline(name, "documents", "embedding", "content", 5, "vector");
-            db.execute("DROP RAG PIPELINE " + name);
-            assertThrows(IllegalArgumentException.class, () -> db.rag().createPipeline("bad; SELECT 1", "documents", "embedding", "content", 5, "vector"));
-            assertThrows(IllegalArgumentException.class, () -> db.rag().createPipeline(name, "documents", "embedding", "content", 5, "rerank"));
+            // The server validates the source table (1.1.19-rc.17 and later),
+            // so the test owns one.
+            String table = "java_pipeline_docs_" + ProcessHandle.current().pid();
+            db.execute("CREATE TABLE " + table + " (id int PRIMARY KEY, content text, embedding vector(3))");
+            try {
+                db.rag().createPipeline(name, table, "embedding", "content", 5, "vector");
+                db.execute("DROP RAG PIPELINE " + name);
+                assertThrows(IllegalArgumentException.class, () -> db.rag().createPipeline("bad; SELECT 1", table, "embedding", "content", 5, "vector"));
+                assertThrows(IllegalArgumentException.class, () -> db.rag().createPipeline(name, table, "embedding", "content", 5, "rerank"));
+            } finally {
+                db.execute("DROP TABLE " + table);
+            }
         }
     }
 }
